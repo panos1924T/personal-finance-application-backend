@@ -1,153 +1,184 @@
 # Expense Tracker API
 
-A headless RESTful API for personal finance management, built as a Coding Factory (OPA) capstone project. Supports multi-user expense tracking across accounts, categories, and transactions — with a focus on correctness, security, and clean architecture.
-
----
+Headless REST API for personal finance management (accounts, categories, transactions), with JWT authentication, role/capability authorization, and soft-delete behavior.
 
 ## Tech Stack
 
-- **Java 21** / **Spring Boot 3**
-- **PostgreSQL** — relational database
-- **Spring Security** — stateless JWT authentication
-- **Spring Data JPA** (Hibernate) + `@SQLRestriction` for transparent soft delete
-- **BCrypt** — password hashing
-- **BigDecimal** — monetary precision
-- **Gradle** — build tool
-
----
-
-## Features
-
-- **JWT Authentication** — stateless, token-based auth with BCrypt password hashing
-- **Multi-user isolation** — all resources are scoped to the authenticated user via UUID ownership checks
-- **Soft delete** — records are never hard-deleted; `AbstractEntity` base class manages `deleted` flag and `deletedAt` timestamp transparently via `@SQLRestriction`
-- **Financial precision** — all monetary values use `BigDecimal`
-- **Hybrid exception architecture** — checked exceptions for critical financial operations (insufficient balance, invalid transaction), unchecked for domain errors (not found, unauthorized, duplicate)
-- **Clean layering** — DTOs, Mappers, Services, and Repositories are strictly separated; no entity objects leak into the API layer
-
----
-
-## Domain Model
-
-```
-User
- └── Account  (type: LIQUIDITY | SAVINGS | INVESTMENT | CREDIT)
-      └── Transaction
-           └── Category
-```
-
----
-
-## Project Structure
-
-```
-src/main/java/
-  entity/         JPA entities (User, Account, Category, Transaction, AbstractEntity)
-  repository/     Spring Data JPA repositories
-  dto/            Request/response records (CreateDTO, UpdateDTO, ReadOnlyDTO)
-  mapper/         Manual entity <-> DTO mapping (mapTo prefix, null-safe)
-  service/        Service interfaces + implementations (VALIDATE → PREPARE → EXECUTE → RETURN)
-  exception/      6 custom exceptions (AppGenericException base + domain-specific)
-  core/           ErrorHandler (@RestControllerAdvice), SecurityConfig
-```
-
----
-
-## Exception Architecture
-
-| Type | Exceptions | HTTP |
-|---|---|---|
-| Checked (financial) | `InsufficientBalanceException`, `InvalidTransactionException` | 422 |
-| Unchecked (domain) | `EntityNotFoundException`, `EntityAlreadyExistsException`, `UnauthorizedException`, `ValidationException` | 404 / 409 / 401 / 400 |
-
-All exceptions extend either `Exception` (financial) or `AppGenericException extends RuntimeException` (domain).
-
----
-
-## Setup
-
-### Requirements
-
 - Java 21
-- PostgreSQL 15+
-- Gradle (wrapper included)
+- Spring Boot 3.5.x
+- Spring Web
+- Spring Data JPA (Hibernate)
+- Spring Security (JWT + method security)
+- Flyway migrations
+- PostgreSQL
+- Gradle
+- Springdoc OpenAPI (Swagger UI)
+- JUnit 5 + Spring Boot Test + Spring Security Test + JaCoCo
+- Docker + Docker Compose
 
-### Database
+## Architecture
 
-Create a PostgreSQL database and configure the connection in `src/main/resources/application.properties`:
+- `api/`: REST controllers
+- `service/`: business rules and transactional flows
+- `repository/`: data access via Spring Data JPA
+- `dto/`: request/response DTOs
+- `mapper/`: entity <-> DTO mapping
+- `validator/`: custom validation layer
+- `security/`: JWT filter, auth config, CORS, handlers
+- `db/migration`: versioned schema and seed migrations
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/expense_tracker
-spring.datasource.username=your_user
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
-```
-
-### Run
+## Build
 
 ```bash
-./gradlew bootRun       # Start the application
-./gradlew build         # Build the project
-./gradlew test          # Run tests
+./gradlew clean build
 ```
 
-The server starts on port **8080**.
+Generated artifact: `build/libs/et.jar`
 
----
+Useful commands:
 
-## API Overview
+```bash
+./gradlew test
+./gradlew jacocoTestReport
+```
 
-Base path: `/api/v1`
+## Run (Local JVM)
 
-> All endpoints (except registration and login) require a valid JWT:
-> `Authorization: Bearer <token>`
+### 1) Prerequisites
 
-### Auth
+- Java 21
+- PostgreSQL
+- `.env` file in project root
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/auth/register` | Public | Register a new user |
-| POST | `/auth/login` | Public | Authenticate and receive JWT |
+### 2) Configure `.env`
 
-### Accounts
+Create `.env` from `env.example` and fill:
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/accounts` | Create account |
-| GET | `/accounts/{uuid}` | Get account by UUID |
-| PUT | `/accounts/{uuid}` | Update account |
-| DELETE | `/accounts/{uuid}` | Soft-delete account |
+```env
+DB_USERNAME=...
+DB_PASSWORD=...
+JWT_SECRET_KEY=...
 
-### Categories
+PG_HOST=
+PG_PORT=
+PG_DB=
+SPRING_PROFILES_ACTIVE=
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/categories` | Create category |
-| GET | `/categories/{uuid}` | Get category |
-| PUT | `/categories/{uuid}` | Update category |
-| DELETE | `/categories/{uuid}` | Soft-delete category |
+# optional admin seeding
+ADMIN_EMAIL=...
+ADMIN_PASSWORD=...
+```
 
-### Transactions
+Notes:
+- Environment variables are loaded from `.env` by `EnvConfig` (dotenv).
+- Default active profile in `application.properties` is `dev`; for local PostgreSQL on `5432`, `staging` is the practical default.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/transactions` | Create transaction |
-| GET | `/transactions/{uuid}` | Get transaction |
-| PUT | `/transactions/{uuid}` | Update transaction |
-| DELETE | `/transactions/{uuid}` | Soft-delete transaction (with balance reversal) |
+### 3) Start the application
 
----
+```bash
+./gradlew bootRun --args='--spring.profiles.active=staging'
+```
 
-## Design Decisions
+API base URL: `http://localhost:8080/api/v1`  
+Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 
-- **UUID as external identifier** — internal `id` columns are never exposed in the API
-- **Service method pattern** — every service method follows: VALIDATE → PREPARE → EXECUTE → RETURN
-- **Soft delete with balance reversal** — deleting a transaction reverses its effect on the account balance within the same `@Transactional` operation
-- **DTOs as Java records** — immutable, concise, with Jakarta Validation annotations
-- **No entity objects in DTOs** — strict separation to avoid leaking persistence concerns into the API layer
+## Run (Docker Compose)
 
----
+`docker-compose.yml` starts:
+- `db` (PostgreSQL 17, host port `5434`)
+- `app` (Spring Boot API on `8080`)
 
-## Status
+Commands:
 
-🚧 Work in progress — developed as a Coding Factory (OPA) capstone project.
+```bash
+./gradlew clean build -x test
+docker compose up -d --build
+```
+
+or use:
+
+```bash
+./startup.sh
+```
+
+## Authentication and Authorization
+
+Public endpoints:
+- `POST /api/v1/users` (register)
+- `POST /api/v1/auth/authenticate` (login)
+
+All other endpoints require:
+- `Authorization: Bearer <jwt>`
+
+Authorization model:
+- Roles: `ADMIN`, `CITIZEN`
+- Capabilities seeded by Flyway migrations (`V2`, `V3`)
+- Method-level authorization with `@PreAuthorize` for user operations
+
+## Business Logic
+
+### 1) User lifecycle
+
+- On registration:
+  - user role is set to `CITIZEN`
+  - default categories are seeded (expense and income roots)
+  - default `Cash` account is created with zero balance
+- User email must be unique.
+- User delete is soft delete.
+
+### 2) Admin seeding at startup
+
+Implemented in `runner/AdminSeeder`:
+- If `ADMIN_EMAIL` and `ADMIN_PASSWORD` are provided and the user does not already exist:
+  - create a `superadmin` user
+  - hash password with BCrypt
+  - attach role `ADMIN` (must exist from DB migrations)
+- If admin env vars are missing, seeding is skipped.
+
+### 3) Account rules
+
+- Accounts are always user-scoped.
+- Default account cannot be updated or deleted.
+- Account deletion is allowed only when:
+  - account is not already deleted
+  - account balance is exactly zero
+- Account deletion is soft delete.
+
+### 4) Category rules
+
+- Category hierarchy supports 2 levels: root and child.
+- Child category rules:
+  - parent must be a root category (not another child)
+  - child type must match parent transaction type
+- Name uniqueness is enforced per user/type/parent scope.
+- Parent category with active children cannot be deleted.
+- Category deletion is soft delete.
+
+### 5) Transaction and balance rules
+
+Creation rules:
+- `amount > 0` is mandatory
+- `INCOME`: requires `INCOME` category, credits default account
+- `EXPENSE`: requires `EXPENSE` category and source account, debits source account
+- `TRANSFER`: requires source and target account, they must be different; debit source and credit target
+
+Update/Delete behavior:
+- Existing transaction financial effect is reverted first.
+- On update, new effect is then applied.
+- Delete is soft delete with balance reversal.
+
+### 6) Soft-delete model
+
+- Core entities include `deleted` and `deletedAt`.
+- Active-only queries explicitly filter `deleted=false`.
+- Several GET endpoints support `includeDeleted`.
+
+## API Endpoints (Summary)
+
+- Auth: `/api/v1/auth/authenticate`
+- Users: `/api/v1/users`
+- Accounts: `/api/v1/accounts`
+- Categories: `/api/v1/categories`
+- Transactions: `/api/v1/transactions`
+
+For full request/response contracts, use Swagger UI.
