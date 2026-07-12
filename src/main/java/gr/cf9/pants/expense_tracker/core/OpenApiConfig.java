@@ -36,19 +36,18 @@ public class OpenApiConfig {
                         .title("ET API")
                         .version("1.0.0")
                         .description("""
-                                REST API for managing the Coding Factory educational programs registry.
-                                Provides endpoints for managing teachers, users, and organizational data.
-                                
+                                REST API for managing each individual's personal finance.
+                                Provides endpoints for managing users, accounts, transactions and categories.
                                 Authentication is done via JWT Bearer tokens.
                                 Obtain a token from /api/auth/authenticate before using secured endpoints.
                         """)
                         .contact(new Contact()
-                                .name("Coding Factory @ AUEB")
-                                .email("codingfactory@aueb.gr")
-                                .url("https://codingfactory.aueb.gr"))
+                                .name("PanTs")
+                                .email("tsitsikaspan@gmail.com")
+                                .url("https://panos1924t.github.io/personal-cv/"))
                         .license(new License()
-                                .name("CC0 1.0 Universal")
-                                .url("https://creativecommons.org/publicdomain/zero/1.0")));
+                                .name("MIT License")
+                                .url("https://opensource.org/licenses/MIT")));
     }
 
     /*
