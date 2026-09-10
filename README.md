@@ -1,4 +1,4 @@
-# Expense Tracker API
+# Personal Finance API (ET)
 
 Headless REST API for personal finance management (accounts, categories, transactions), with JWT authentication, role/capability authorization, and soft-delete behavior.
 
