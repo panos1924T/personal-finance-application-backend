@@ -247,6 +247,6 @@ public class CategoryService implements ICategoryService{
         if (name == null || name.isBlank()) {
             throw new InvalidArgumentException("Category", "Category name is required");
         }
-        return name.trim().toLowerCase();
+        return name.trim();
     }
 }
