@@ -11,6 +11,7 @@ import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class TransactionUpdateValidator {
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional(readOnly = true)
     public void validate(UUID transactionUuid, TransactionUpdateDTO dto, Errors errors) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
