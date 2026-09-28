@@ -1,39 +1,72 @@
 services:
+
   db:
     image: postgres:17-alpine
-    container_name: postgres_db
+    container_name: personal_finance_db
+
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # maps host volume to container volume
-    ports:
-      - "5434:5432"
+      - personal_finance_postgres_data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USERNAME} -d ${POSTGRES_DB}"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
+
     restart: unless-stopped
 
-  app:
+
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: java_app
+
+    container_name: personal_finance_backend
+
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}?currentSchema=etapp
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}?currentSchema=expensetrackerapp
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-    ports:
-      - "8080:8080"
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-10800000}
+
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8081}
+
     depends_on:
       db:
         condition: service_healthy
+
     restart: unless-stopped
 
+
+  frontend:
+    build:
+      context: ../personal-finance-application-frontend
+
+    container_name: personal_finance_frontend
+
+    ports:
+      - "${APP_PORT:-8081}:80"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+
 volumes:
-  postgres_data:  # this is the name of the volume in host machine
+  personal_finance_postgres_data:
