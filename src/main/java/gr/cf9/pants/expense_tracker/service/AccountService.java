@@ -65,7 +65,7 @@ public class AccountService implements IAccountService{
         Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
 
-        if (account.isDefaultAccount() == true) {
+        if (account.isDefaultAccount()) {
             throw new InvalidArgumentException("Account", "Cannot update default account");
         }
 
