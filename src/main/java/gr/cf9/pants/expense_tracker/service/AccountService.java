@@ -88,7 +88,7 @@ public class AccountService implements IAccountService{
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
 
-        if (account.isDeleted() == true) {
+        if (account.isDeleted()) {
             throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is already deleted");
         }
 
