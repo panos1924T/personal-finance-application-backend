@@ -16,41 +16,6 @@ import java.util.UUID;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
-//    Page<Transaction> findTransByUser(User user, Pageable pageable);
-//
-//    @Query("SELECT t FROM Transaction t " +
-//            "WHERE t.user = :user " +
-//            "AND (t.sourceAccount = :account OR t.targetAccount = :account)")
-//    Page<Transaction> findTransByUserAndAccount(
-//            @Param("user") User user,
-//            @Param("account") Account account,
-//            Pageable pageable
-//    );
-//
-//    Page<Transaction> findTransByUserAndType(User user, TransactionType type, Pageable pageable);
-//
-//    Page<Transaction> findTransByUserAndCategory(User user, Category category, Pageable pageable);
-//
-//
-//    @Query("SELECT t FROM Transaction t " +
-//            "WHERE t.user = :user " +
-//            "AND t.category.parent = :parent")
-//    Page<Transaction> findTransByUserAndCategory_Parent(
-//            @Param("user") User user,
-//            @Param("parent") Category parent,
-//            Pageable pageable
-//    );
-//
-//    @Query("""
-//    SELECT t FROM Transaction t
-//    WHERE t.user = :user
-//      AND (t.category = :category OR t.category.parent = :category)
-//    ORDER BY t.transactionDate DESC
-//    """)
-//    Page<Transaction> findTransByUserAndCategoryOrChildCategory(
-//            User user, Category category, Pageable pageable
-//    );
-
     Optional<Transaction> findTransByUuidAndUser(UUID uuid, User user);
 
     Page<Transaction> findAll(@Nullable Specification<Transaction> specification, Pageable pageable);

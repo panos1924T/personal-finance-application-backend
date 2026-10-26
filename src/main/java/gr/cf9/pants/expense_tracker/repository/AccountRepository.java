@@ -26,14 +26,6 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     Optional<Account> findAccountByUserAndDefaultAccountTrue(User user);
 
-//    List<Account> findAccountByUser(User user);
-//
-//    List<Account> findAccountByUserAndDeletedFalse(User user);
-//
-//    List<Account> findAccountByUserAndAccountType(User user, AccountType accountType);
-//
-//    List<Account> findAccountByUserAndAccountTypeAndDeletedFalse(User user, AccountType accountType);
-
     boolean existsAccountByUserAndNameAndDeletedFalse(User user, String name);
 
     boolean existsAccountByUserAndNameAndUuidNotAndDeletedFalse(User user, String name, UUID uuid);

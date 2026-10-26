@@ -27,25 +27,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, JpaSp
             UUID uuid, User user, TransactionType transactionType
     );
 
-//    List<Category> findCategoryByUserAndTypeAndDeletedFalse(User user, TransactionType type);
-//
-//    List<Category> findCategoryByUserAndType(User user, TransactionType type);
-//
-//    List<Category> findCategoryByUserAndDeletedFalse(User user);
-//
-//    List<Category> findCategoryByUser(User user);
-//
-//    List<Category> findCategoryByUserAndParentIsNullAndDeletedFalse(User user);
-//
-//    List<Category> findCategoryByUserAndTypeAndParentIsNullAndDeletedFalse(User user, TransactionType type);
-//
-//    List<Category> findCategoryByUserAndParentAndDeletedFalse(User user, Category parent);
-//
-//    List<Category> findCategoryByUserAndTypeAndParentAndDeletedFalse(
-//            User user,
-//            TransactionType type,
-//            Category parent);
-
     boolean existsCategoryByUserAndNameAndTypeAndParentIsNull(
             User user,
             String name,

@@ -37,23 +37,7 @@ public class UserService implements IUserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final CategoryRepository categoryRepository;
-    private final AccountRepository accountRepository;
-
-    private record ParentCategorySeed(String name, TransactionType type) {}
-
-    private static final List<ParentCategorySeed> DEFAULT_CATEGORIES = List.of(
-            new ParentCategorySeed("Personal",       TransactionType.EXPENSE),
-            new ParentCategorySeed("Home",           TransactionType.EXPENSE),
-            new ParentCategorySeed("Buys",           TransactionType.EXPENSE),
-            new ParentCategorySeed("Transportation", TransactionType.EXPENSE),
-            new ParentCategorySeed("Bills",          TransactionType.EXPENSE),
-            new ParentCategorySeed("Other",          TransactionType.EXPENSE),
-
-            new ParentCategorySeed("Salary",         TransactionType.INCOME),
-            new ParentCategorySeed("Business",       TransactionType.INCOME),
-            new ParentCategorySeed("Investment",     TransactionType.INCOME)
-    );
+    private final UserDefaultsInitializer defaultsInitializer;
 
     @Transactional
     @Override
@@ -73,11 +57,10 @@ public class UserService implements IUserService{
 
         //EXECUTE
         User savedUser = userRepository.save(user);
-        createDefaultCategories(savedUser);
-        createDefaultCashAccount(savedUser);
+        defaultsInitializer.createDefaultCategories(savedUser);
+        defaultsInitializer.createDefaultCashAccount(savedUser);
 
         //RETURN
-
         return userMapper.toReadOnly(savedUser);
     }
 
@@ -164,31 +147,5 @@ public class UserService implements IUserService{
     @Transactional(readOnly = true)
     public boolean isUserExists(String email) {
         return userRepository.existsUserByEmail(email);
-    }
-
-    private void createDefaultCategories(User user) {
-        List<Category> categories = DEFAULT_CATEGORIES.stream()
-                .map(seed -> {
-                    Category c = new Category();
-                    c.setUser(user);
-                    c.setName(seed.name());
-                    c.setType(seed.type());
-                    return c;
-                })
-                .toList();
-
-        categoryRepository.saveAll(categories);
-    }
-
-    private void createDefaultCashAccount(User user) {
-        Account cashDefault = new Account(
-                "Cash",
-                BigDecimal.ZERO,
-                AccountType.LIQUIDITY,
-                true,
-                user
-        );
-
-        accountRepository.save(cashDefault);
     }
 }
