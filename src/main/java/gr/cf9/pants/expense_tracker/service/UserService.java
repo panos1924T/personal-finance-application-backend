@@ -77,7 +77,6 @@ public class UserService implements IUserService{
         createDefaultCashAccount(savedUser);
 
         //RETURN
-
         return userMapper.toReadOnly(savedUser);
     }
 

@@ -13,6 +13,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Αυτή η κλάση δημιουργήθηκε μόνο για να κληρονομηθεί απο
+ * τις άλλες entities καθώς μοιράζεται πεδία που θα έχουν όλα τα
+ * άλλα entities έτσι ώστε να υπάρχει σωστό audit.
+ */
+
 @MappedSuperclass       // no db table, just inheritance
 @Getter
 @Setter
