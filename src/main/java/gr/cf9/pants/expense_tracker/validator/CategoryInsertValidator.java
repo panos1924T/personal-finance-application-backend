@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.validator;
 
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.model.Category;
 import gr.cf9.pants.expense_tracker.model.User;
@@ -29,7 +30,7 @@ public class CategoryInsertValidator implements Validator {
             return;
         }
 
-        String name = dto.name().trim().toLowerCase();
+        String name = NameNormalizer.normalizeName(dto.name());
         if (dto.parentUuid() == null) {
             if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNull(user, name, dto.type())) {
                 errors.rejectValue("name", "category.root.exists", "Parent category already exists");
