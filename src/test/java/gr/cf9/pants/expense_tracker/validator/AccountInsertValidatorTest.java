@@ -99,10 +99,15 @@ class AccountInsertValidatorTest {
     @Test
     @DisplayName("Should reject when account name already exists for user")
     void testValidate_NameAlreadyExists() {
-        when(accountRepository.existsAccountByUserAndNameAndDeletedFalse(testUser, "Test Account"))
-                .thenReturn(true);
+        AccountCreateDTO dtoWithPaddedName = new AccountCreateDTO(
+                "   Test AccOunt  ",
+                null,
+                new BigDecimal("100.00")
+        );
 
-        validator.validate(createDTO, bindingResult);
+        when(accountRepository.existsAccountByUserAndName(testUser, "TEST ACCOUNT"))
+                .thenReturn(true);
+        validator.validate(dtoWithPaddedName, bindingResult);
 
         assertTrue(bindingResult.hasErrors());
         assertTrue(bindingResult.getFieldError("name").getDefaultMessage().contains("exists"));
@@ -111,7 +116,7 @@ class AccountInsertValidatorTest {
     @Test
     @DisplayName("Should pass validation with valid data")
     void testValidate_Success() {
-        when(accountRepository.existsAccountByUserAndNameAndDeletedFalse(testUser, "Test Account"))
+        when(accountRepository.existsAccountByUserAndName(testUser, "TEST ACCOUNT"))
                 .thenReturn(false);
 
         validator.validate(createDTO, bindingResult);
