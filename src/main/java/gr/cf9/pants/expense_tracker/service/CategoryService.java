@@ -4,6 +4,7 @@ import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
 import gr.cf9.pants.expense_tracker.core.filters.CategoryFilters;
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
@@ -247,6 +248,6 @@ public class CategoryService implements ICategoryService{
         if (name == null || name.isBlank()) {
             throw new InvalidArgumentException("Category", "Category name is required");
         }
-        return name.trim();
+        return NameNormalizer.normalizeName(name);
     }
 }
