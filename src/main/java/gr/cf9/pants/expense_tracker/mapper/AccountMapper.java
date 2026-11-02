@@ -1,6 +1,6 @@
 package gr.cf9.pants.expense_tracker.mapper;
 
-import gr.cf9.pants.expense_tracker.core.enums.AccountType;
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.model.Account;
@@ -25,7 +25,7 @@ public class AccountMapper {
     public Account toEntity(AccountCreateDTO dto, User user) {
         Account account = new Account();
         account.setUser(user);
-        account.setName(dto.name());
+        account.setName(NameNormalizer.normalizeName(dto.name()));
         account.setAccountType(dto.accountType());
         account.setBalance(
                 dto.initialBalance() != null ? dto.initialBalance() : BigDecimal.ZERO
