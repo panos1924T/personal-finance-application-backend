@@ -185,14 +185,14 @@ class AccountServiceTest {
         void testUpdateAccount_Success() {
             Account updatedAccount = new Account();
             updatedAccount.setUuid(testAccountUuid);
-            updatedAccount.setName("Updated Savings");
+            updatedAccount.setName("UPDATED SAVINGS");
             updatedAccount.setBalance(new BigDecimal("1500.00"));
             updatedAccount.setDefaultAccount(false);
             updatedAccount.setUser(testUser);
 
             AccountReadOnlyDTO updatedDTO = new AccountReadOnlyDTO(
                     testAccountUuid,
-                    "Updated Savings",
+                    "UPDATED SAVINGS",
                     "SAVINGS",
                     new BigDecimal("1500.00"),
                     Instant.now()
@@ -207,10 +207,16 @@ class AccountServiceTest {
             when(accountMapper.toReadOnly(updatedAccount))
                     .thenReturn(updatedDTO);
 
-            AccountReadOnlyDTO result = accountService.updateAccount(testAccountUuid, updateDTO, testUserUuid);
+            AccountUpdateDTO paddedNameDto = new AccountUpdateDTO(
+                    "  Updated Savings  ",
+                    updateDTO.balance()
+            );
+
+            AccountReadOnlyDTO result = accountService.updateAccount(testAccountUuid, paddedNameDto, testUserUuid);
 
             assertNotNull(result);
-            assertEquals("Updated Savings", result.name());
+            assertEquals("UPDATED SAVINGS", testAccount.getName());
+            assertEquals("UPDATED SAVINGS", result.name());
             verify(accountRepository, times(1)).save(any(Account.class));
         }
 
