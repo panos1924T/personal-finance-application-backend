@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.validator;
 
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
@@ -24,7 +25,8 @@ public class AccountUpdateValidator {
             return;
         }
 
-        if (accountRepository.existsAccountByUserAndNameAndUuidNotAndDeletedFalse(user, dto.name().trim(), accountUuid)) {
+        if (accountRepository.existsAccountByUserAndNameAndUuidNot(
+                user, NameNormalizer.normalizeName(dto.name()), accountUuid)) {
             errors.rejectValue("name", "account.name.exists", "Account name is taken from another account");
         }
     }

@@ -30,9 +30,13 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     boolean existsAccountByUserAndNameAndUuidNotAndDeletedFalse(User user, String name, UUID uuid);
 
+    boolean existsAccountByUserAndNameAndUuidNot(User user, String name, UUID uuid);
+
     boolean existsAccountByUserAndDefaultAccountTrue(User user);
 
     boolean existsAccountByUuidAndUserAndDeletedFalse(UUID uuid, User user);
+
+    boolean existsAccountByUserAndName(User user, String name);
 
     Page<Account> findAll(@Nullable Specification<Account> specification, Pageable pageable);
 }

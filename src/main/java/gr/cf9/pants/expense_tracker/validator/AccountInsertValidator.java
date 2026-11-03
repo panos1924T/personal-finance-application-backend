@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.validator;
 
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
@@ -30,7 +31,7 @@ public class AccountInsertValidator implements Validator {
             return;
         }
 
-        if (accountRepository.existsAccountByUserAndNameAndDeletedFalse(user, dto.name().trim())) {
+        if (accountRepository.existsAccountByUserAndName(user, NameNormalizer.normalizeName(dto.name()))) {
             errors.rejectValue("name", "account.name.exists", "Account name already exists");
         }
     }

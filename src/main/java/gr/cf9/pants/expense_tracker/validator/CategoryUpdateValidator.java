@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.validator;
 
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
 import gr.cf9.pants.expense_tracker.model.Category;
 import gr.cf9.pants.expense_tracker.model.User;
@@ -31,7 +32,7 @@ public class CategoryUpdateValidator {
         }
 
         Category category = categoryOptional.get();
-        String newName = dto.name().trim().toLowerCase();
+        String newName = NameNormalizer.normalizeName(dto.name());
 
         if (category.getParent() == null) {
             if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNullAndUuidNot(user, newName, category.getType(), categoryUuid)) {

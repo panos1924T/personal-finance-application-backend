@@ -5,6 +5,7 @@ import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
 import gr.cf9.pants.expense_tracker.core.filters.AccountFilters;
 import gr.cf9.pants.expense_tracker.core.filters.CategoryFilters;
+import gr.cf9.pants.expense_tracker.core.util.NameNormalizer;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
@@ -70,7 +71,7 @@ public class AccountService implements IAccountService{
         }
 
         //PREPARE
-        account.setName(dto.name());
+        account.setName(NameNormalizer.normalizeName(dto.name()));
 
         //EXECUTE
         Account updatedAccount = accountRepository.save(account);
