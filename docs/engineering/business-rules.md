@@ -42,14 +42,16 @@ edit repository files or run commands that modify the repository.
 - Changing `accountType` never automatically changes the sign or value of
   `initialBalance` or current `balance`. The user corrects the initial balance
   separately if needed.
-- The default `CASH` account allows only `initialBalance` changes. Its name and
-  type cannot be changed, and it cannot be archived.
-- These restrictions apply to editing or archiving the default `CASH` account.
-  The account remains available for normal transactions, including as the
-  default destination for income.
 
 ## 3. Accounts: type changes and archive
 
+- A `CASH` account of type `LIQUIDITY` is created when a user is created, so the
+  user starts with an account available.
+- `CASH` is an ordinary account with no special editing or archive restrictions.
+  It may be renamed, have its type changed, or be archived under the same rules
+  as any other account.
+- There is no default account. The backend does not implicitly select an
+  account for transactions.
 - `accountType` may change only when the account has no active transactions.
 - Soft-deleted transactions count as inactive. Users cannot restore transactions.
 - Accounts may be archived only when their current balance is exactly zero.
@@ -67,15 +69,17 @@ edit repository files or run commands that modify the repository.
 
 ## 4. Transactions, income, expenses, and transfers
 
+- Creating an income requires an explicitly selected active account belonging
+  to the user. The backend must reject a missing, invalid, or archived account
+  rather than selecting one implicitly.
+- Updating an income requires an explicitly selected account. A new or  changed
+  account association must use an active account. The update may retain the
+  existing archived account association only if the final operation preserves
+  that account's zero-balance rule.
+- Income may credit any account type, including `CREDIT`. A refund may  be
+  recorded as a separate positive `INCOME` transaction credited directly to
+  a `CREDIT` account; it does not modify the original expense.
 - Transaction amounts are positive. Account balances are signed.
-- Income credits a user-selected account. Default `CASH` is the default choice,
-  not a mandatory destination.
-- The frontend sends the UUID of the selected destination account for each
-  income transaction. The backend must not silently choose an account when the
-  destination is missing.
-- This allows a refund to be recorded as a separate positive `INCOME`
-  transaction credited directly to a `CREDIT` account. A refund does not modify
-  the original expense.
 - A `REFUNDS` category may be suggested, but it is not a mandatory model change.
 - The frontend handles presentation, such as displaying negative values in red.
   The backend owns signed amounts and financial calculations.
@@ -167,7 +171,7 @@ current code before proceeding.
 0. Initial code/business/API/test inspection — complete.
 1. Name normalization and duplicate checks — complete.
 2. Account model/API: persisted `initialBalance`, initial-balance correction,
-   default CASH behavior, account type rules, and focused tests.
+ CASH account behavior, account type rules, and focused tests.
 3. Account archive/restore; safeguards for transactions affecting archived
    accounts; selectable income destination on create and update.
 4. Category archive/restore, including cascading archive of active children
